@@ -22,10 +22,10 @@ Designed to score **100 %** against the assignment rubric.
 
 ## File structure
 .
-├── config.php   # Constants & timezone
-├── index.php    # Protected dashboard
-├── login.php    # Form + auth logic
-└── logout.php   # Session destroy
+├── index.php  # Protected dashboard
+├── logout.php  # Session destroy
+├── login.php  # Form + auth logic
+└── config.php  # Constants & timezone
 
 ## Quick start (local PHP CLI)
 ```bash
