@@ -38,24 +38,37 @@ php -S 0.0.0.0:8080
 
 Open http://localhost:8080/login.php in your browser.
 
-Demo credentials
-Username: "admin"
-Password: "secret"
+## Demo credentials
+| User | Password |
+|---------|------|
+|admin|secret|
 
+---
 ## Security notes
-  •	Session fixation defeated via session_regenerate_id(true) on login.
-  •	All user‑supplied strings are escaped with htmlspecialchars().
-  •	Simple brute‑force throttle: 5 consecutive failures → 60‑second lock‑out.
 
-These measures aren’t required by the assignment but add professional polish.
+| Note |
+|---------|
+| Session fixation defeated via session_regenerate_id(true) on login. |
+| All user‑supplied strings are escaped with htmlspecialchars(). |
+| Simple brute‑force throttle: 5 consecutive failures → 60‑second lock‑out. |
 
-Assignment compliance checklist
-  •	GitHub repo created & code pushed
-  •	Replit project linked to GitHub
-  •	Functional hard‑coded login form
-  •	Session variables for authentication and failed attempts
-  •	Redirect logic for both guests and logged‑in users
-  •	Logout clears session
-  •	Current date shown in readable format
+---
+* These measures aren’t required by the assignment but add professional polish.
 
-Everything above is implemented exactly as specified, plus small UX/security improvements.
+
+
+## Assignment compliance checklist
+
+| Feature | Done |
+|---------|------|
+| GitHub repo created & code pushed | ✔ |
+| Replit project linked to GitHub | ✔ |
+| Functional hard‑coded login form | ✔ |
+| Session variables for authentication and failed attempts | ✔ |
+| Redirect logic for both guests and logged‑in users | ✔ |
+| Logout clears session | ✔ |
+| Current date shown in readable format | ✔ |
+
+---
+
+* Everything above is implemented exactly as specified, plus small UX/security improvements.
