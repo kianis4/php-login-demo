@@ -2,19 +2,25 @@
 session_start();
 require_once 'config.php';
 
-/* Bounce authenticated users straight to the dashboard */
+/* ---------- flash message handling ---------- */
+$notice = '';
+if (!empty($_SESSION['flash'])) {
+  $notice = $_SESSION['flash'];
+  unset($_SESSION['flash']);          // show once, then forget
+}
+
+/* ---------- bounce if already logged in ---------- */
 if (!empty($_SESSION['authenticated'])) {
   header('Location: index.php');
   exit;
 }
 
-/* Handle lockout window */
+/* ---------- lockout + login logic ---------- */
 $now = time();
 if (isset($_SESSION['lockout_until']) && $now < $_SESSION['lockout_until']) {
   $remaining = $_SESSION['lockout_until'] - $now;
   $error = "Too many failed attempts. Try again in {$remaining} s.";
 } elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
-  // Normal login flow
   $u = trim($_POST['username'] ?? '');
   $p = $_POST['password'] ?? '';
 
@@ -22,7 +28,7 @@ if (isset($_SESSION['lockout_until']) && $now < $_SESSION['lockout_until']) {
 
   if ($u === VALID_USERNAME && $p === VALID_PASSWORD) {
     /* --- success --- */
-    session_regenerate_id(true);        // anti‑fixation
+    session_regenerate_id(true);
     $_SESSION['authenticated'] = true;
     $_SESSION['username']      = $u;
     unset($_SESSION['failed'], $_SESSION['lockout_until']);
@@ -46,6 +52,10 @@ if (isset($_SESSION['lockout_until']) && $now < $_SESSION['lockout_until']) {
 <head><meta charset="UTF-8"><title>Login</title></head>
 <body>
 <h2>Login</h2>
+
+<?php if ($notice): ?>
+  <p style="color:blue"><?= htmlspecialchars($notice) ?></p>
+<?php endif; ?>
 
 <form method="post">
   <label>Username
