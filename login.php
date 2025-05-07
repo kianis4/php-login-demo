@@ -1,33 +1,43 @@
 <?php
-/* ---------- login.php ---------- */
 session_start();
+require_once 'config.php';
 
-/* Hard‑coded demo credentials */
-$VALID_USERNAME = "admin";
-$VALID_PASSWORD = "secret";
-
-/* If user is already logged in, bounce them away */
-if (isset($_SESSION['authenticated']) && $_SESSION['authenticated'] === true) {
-  header("Location: index.php");
-  exit();
+/* Bounce authenticated users straight to the dashboard */
+if (!empty($_SESSION['authenticated'])) {
+  header('Location: index.php');
+  exit;
 }
 
-/* If form submitted, check credentials */
-if ($_SERVER["REQUEST_METHOD"] === "POST") {
-  $u = $_POST["username"] ?? "";
-  $p = $_POST["password"] ?? "";
+/* Handle lockout window */
+$now = time();
+if (isset($_SESSION['lockout_until']) && $now < $_SESSION['lockout_until']) {
+  $remaining = $_SESSION['lockout_until'] - $now;
+  $error = "Too many failed attempts. Try again in {$remaining} s.";
+} elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
+  // Normal login flow
+  $u = trim($_POST['username'] ?? '');
+  $p = $_POST['password'] ?? '';
 
-  /* Initialise fail counter once */
-  if (!isset($_SESSION["failed"])) $_SESSION["failed"] = 0;
+  $_SESSION['failed'] = $_SESSION['failed'] ?? 0;
 
-  if ($u === $VALID_USERNAME && $p === $VALID_PASSWORD) {
-    $_SESSION["authenticated"] = true;
-    $_SESSION["username"]      = $u;
-    header("Location: index.php");
-    exit();
+  if ($u === VALID_USERNAME && $p === VALID_PASSWORD) {
+    /* --- success --- */
+    session_regenerate_id(true);        // anti‑fixation
+    $_SESSION['authenticated'] = true;
+    $_SESSION['username']      = $u;
+    unset($_SESSION['failed'], $_SESSION['lockout_until']);
+    header('Location: index.php');
+    exit;
   } else {
-    $_SESSION["failed"]++;
-    $error = "Invalid credentials (attempt #{$_SESSION['failed']})";
+    /* --- failure --- */
+    $_SESSION['failed']++;
+    if ($_SESSION['failed'] >= MAX_FAILED) {
+      $_SESSION['lockout_until'] = $now + LOCKOUT_SECONDS;
+      $error = "Too many failed attempts. Locked for " . LOCKOUT_SECONDS . " s.";
+    } else {
+      $tries = MAX_FAILED - $_SESSION['failed'];
+      $error = "Invalid credentials. {$tries} attempt(s) left.";
+    }
   }
 }
 ?>
@@ -36,11 +46,20 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 <head><meta charset="UTF-8"><title>Login</title></head>
 <body>
 <h2>Login</h2>
+
 <form method="post">
-  <label>Username <input type="text" name="username" required></label><br><br>
-  <label>Password <input type="password" name="password" required></label><br><br>
+  <label>Username
+    <input type="text" name="username" required autocomplete="username">
+  </label><br><br>
+  <label>Password
+    <input type="password" name="password" required autocomplete="current-password">
+  </label><br><br>
   <button type="submit">Submit</button>
 </form>
-<?php if(isset($error)) echo "<p style='color:red'>$error</p>"; ?>
+
+<?php if (!empty($error)): ?>
+  <p style="color:red"><?= htmlspecialchars($error) ?></p>
+<?php endif; ?>
+
 </body>
 </html>
