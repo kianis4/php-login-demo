@@ -2,9 +2,15 @@
 session_start();
 require_once 'config.php';
 
-/* ---------- protected‑page guard + flash ---------- */
+/* ---------- flash message handling ---------- */
+$notice = '';
+if (!empty($_SESSION['flash'])) {
+  $notice = $_SESSION['flash'];
+  unset($_SESSION['flash']);        // one‑shot
+}
+
+/* ---------- protected‑page guard ---------- */
 if (empty($_SESSION['authenticated'])) {
-  // one‑time notice for the next request
   $_SESSION['flash'] = '🚫  This page is protected — please log in first.';
   header('Location: login.php');
   exit;
@@ -18,6 +24,11 @@ $today    = date('l, F j, Y \a\t g:i A');
 <html lang="en">
 <head><meta charset="UTF-8"><title>Dashboard</title></head>
 <body>
+
+<?php if ($notice): ?>
+  <p style="color:blue"><?= htmlspecialchars($notice) ?></p>
+<?php endif; ?>
+
 <h1>Welcome, <?= $username ?>!</h1>
 <p>Today is <?= $today ?></p>
 

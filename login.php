@@ -6,11 +6,12 @@ require_once 'config.php';
 $notice = '';
 if (!empty($_SESSION['flash'])) {
   $notice = $_SESSION['flash'];
-  unset($_SESSION['flash']);          // show once, then forget
+  unset($_SESSION['flash']);          // display once
 }
 
 /* ---------- bounce if already logged in ---------- */
 if (!empty($_SESSION['authenticated'])) {
+  $_SESSION['flash'] = 'ℹ️  You are already logged in.';
   header('Location: index.php');
   exit;
 }
@@ -21,6 +22,7 @@ if (isset($_SESSION['lockout_until']) && $now < $_SESSION['lockout_until']) {
   $remaining = $_SESSION['lockout_until'] - $now;
   $error = "Too many failed attempts. Try again in {$remaining} s.";
 } elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
+
   $u = trim($_POST['username'] ?? '');
   $p = $_POST['password'] ?? '';
 
